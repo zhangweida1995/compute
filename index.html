@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="贴现率计算器，在线计算器，估值计算器,贴现率，自由现金流，估值公式">
+  <title>贴现率计算器，在线计算器，估值计算器</title>
+</head>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  h2 {
+    padding: 20px 0;
+    text-align: center;
+    background-color: whitesmoke;
+  }
+
+  .comput-box {
+    width: 750px;
+    margin: 0 auto;
+  }
+
+  .input-group {
+    padding: 20px;
+  }
+
+  .input-group-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .input-group-item:last-child {
+    margin: 0;
+  }
+
+  input[type='button'] {
+    width: 344px;
+    height: 40px;
+    line-height: 40px;
+    background: #409EFF;
+    color: white;
+    border: none;
+  }
+
+  input[type='button']:active {
+    background-color: #3584d3;
+  }
+
+  label {
+    width: 140px;
+    text-align: left;
+  }
+
+  label::after {
+    content: '：'
+  }
+
+  input {
+    width: 200px;
+    height: 25px;
+  }
+
+  .tooltip {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    left: calc(710px - 344px / 2);
+    display: none;
+  }
+
+  table {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 4px 0;
+  }
+
+  .stripe {
+    background: #fafafa;
+  }
+</style>
+
+<body>
+  <h2>贴现率估值计算器</h2>
+  <div class="comput-box">
+    <div class="input-group">
+      <div class="input-group-item">
+        <label for="startYear">起始年份</label>
+        <input type="number" value="2019" id="startYear" />
+        <span class="tooltip tooltip-startYear">请输入</span>
+
+      </div>
+      <div class="input-group-item">
+        <label for="cashFlow">自由现金流(￥)</label>
+        <input type="number" value="6.05" id="cashFlow" />
+        <span class="tooltip tooltip-cashFlow">请输入</span>
+
+      </div>
+      <div class="input-group-item">
+        <label for="timeLimit">时间期限</label>
+        <input type="number" value="10" id="timeLimit" />
+        <span class="tooltip tooltip-timeLimit">请输入</span>
+      </div>
+      <div class="input-group-item">
+        <label for="growthRate">预估增长率(%)</label>
+        <input type="number" value="15" id="growthRate" />
+        <span class="tooltip tooltip-growthRate">请输入</span>
+      </div>
+      <div class="input-group-item">
+        <label for="growthRate_forever">永续增长率(%)</label>
+        <input type="number" value="4" id="growthRate_forever" />
+        <span class="tooltip tooltip-growthRate_forever">请输入</span>
+      </div>
+      <div class="input-group-item">
+        <label for="discountRate">预估贴现率(%)</label>
+        <input type="number" value="10" id="discountRate" />
+        <span class="tooltip tooltip-discountRate">请输入</span>
+      </div>
+      <div class="input-group-item">
+        <input type="button" value="开始计算" id="sumbit" onclick="submit()" />
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table border="1" cellspacing="0" cellpadding="0">
+        <colgroup>
+          <col style="width:140px;" />
+          <col style="width:140px;" />
+          <col />
+          <col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>年份</th>
+            <th>增长率</th>
+            <th>自由现金流</th>
+            <th>价值贴现</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+  <script>
+    function $(id) {
+      return document.querySelector(id)
+    }
+    function getValue(id) {
+      let target = $(`#${id}`)
+      return target ? parseFloat(target.value) : 0
+    }
+    function valid(validate) {
+      let keys = Object.keys(validate)
+      let res = keys.map((k, i) => {
+        if (isNaN(validate[k])) {
+          $(`.tooltip-${k}`).style.display = 'block'
+        } else {
+          $(`.tooltip-${k}`).style.display = 'none'
+        }
+        return !isNaN(validate[k])
+      })
+      return res.every(item => item)
+    }
+    function submit() {
+      let startYear = getValue('startYear')   //起始年份
+      let cashFlow = getValue('cashFlow')  //起始年份的现金流
+      let timeLimit = getValue('timeLimit')   //期限
+      let growthRate = getValue('growthRate')   //增长率
+      let growthRate_forever = getValue('growthRate_forever')   //永续增长率
+      let discountRate = getValue('discountRate')   //贴现率
+      let isValid = valid({ startYear, cashFlow, timeLimit, growthRate, growthRate_forever, discountRate })
+      if (!isValid) return
+      let growthRate_percentage = growthRate / 100 // 增长率百分比
+      let growthRate_forever_percentage = growthRate_forever / 100 //永续增长率百分比
+      let discountRate_percentage = discountRate / 100 //贴现率百分比
+
+      let year = startYear
+
+      let dataList = []
+      for (let lim = 1; lim <= timeLimit + 1; lim++) {
+        let param = {}
+        //先求出自由现金流  
+        year = ++year
+        // 每一年的自由现金流, 现金流 * （1+增长率）^ X
+        let currentCashFlow = cashFlow * Math.pow((1 + growthRate_percentage), lim)
+        // 每一年的折现金额, 计算后的现金流 / （1 + 贴现率）^ X
+        let currenthiscountRate = currentCashFlow / Math.pow((1 + discountRate_percentage), lim)
+        if (lim <= timeLimit) {
+          param = {
+            year,
+            cash_flow: currentCashFlow,
+            discount: currenthiscountRate
+          }
+        } else {
+          //永续现金流，上一年现金流 * （1 + 永续增长率）* （1 + 贴现率） / （贴现率 - 永续增长率）
+          let { cash_flow } = dataList[dataList.length - 1]
+          let count_cashFlow = cash_flow * (1 + growthRate_forever_percentage) * (1 + discountRate_percentage) / (discountRate_percentage - growthRate_forever_percentage)
+          // 永续现金流折现 ，永续现金流 / （1 + 贴现率）^ X
+          let count_discount = count_cashFlow / Math.pow((1 + discountRate_percentage), lim)
+          param = {
+            year,
+            cash_flow: count_cashFlow,
+            discount: count_discount
+          }
+        }
+        dataList.push(param)
+      }
+      setTable({ startYear, cashFlow, growthRate, growthRate_forever, discountRate, dataList })
+    }
+
+    function setTable({ startYear, cashFlow, growthRate, growthRate_forever, discountRate, dataList }) {
+      let countValue = dataList.map(item => item.discount).reduce((total, num) => total + num)
+
+      let innerHTML = `
+          <tr>
+            <td>${startYear}</td>
+            <td>&nbsp;</td>
+            <td>${cashFlow}</td>
+            <td>${discountRate}%</td>
+          </tr>
+      `
+      dataList.forEach((item, i) => {
+        let isLast = i == dataList.length - 1   //永续价值合计
+        innerHTML += `
+          <tr class="${i % 2 == 0 ? 'stripe' : ''}">
+            <td>${item.year}${isLast ? '年后' : ''}</td>
+            <td>${isLast ? growthRate_forever : growthRate}%</td>
+            <td>${item.cash_flow.toFixed(4)}</td>
+            <td>${item.discount.toFixed(4)}</td>
+          </tr>
+          
+          `
+      })
+      innerHTML += `
+        <tr  style="font-weight:bold;">
+          <td colspan="3" style="text-align:center">价值合计</td>
+          <td>${countValue.toFixed(4)}</td>
+        </tr>`
+      $('#tbody').innerHTML = innerHTML
+    }
+
+  </script>
+</body>
+
+</html>
