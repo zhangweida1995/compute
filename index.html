@@ -20,18 +20,19 @@
   }
 
   .comput-box {
-    width: 750px;
+    width: 1150px;
     margin: 0 auto;
   }
 
   .input-group {
     padding: 20px;
+    float: left;
   }
 
   .input-group-item {
     display: flex;
     align-items: center;
-    justify-content: center;
+    /* justify-content: center; */
     margin-bottom: 14px;
     position: relative;
   }
@@ -71,8 +72,15 @@
     color: red;
     font-size: 14px;
     position: absolute;
-    left: calc(710px - 344px / 2);
+    right: calc(60px - 384px / 2);
     display: none;
+    width: 120px;
+  }
+
+  .doc-desc {
+    padding-top: 20px;
+    float: right;
+    line-height: 32px;
   }
 
   table {
@@ -131,6 +139,14 @@
       <div class="input-group-item">
         <input type="button" value="开始计算" id="sumbit" onclick="submit()" />
       </div>
+    </div>
+    <div class="doc-desc">
+      <h4>计算公式说明：</h4>
+      <p> 每一年的自由现金流 = 自由现金流 * （1+增长率）^ <sup>y</sup></p>
+      <p>每一年的现金流量折现 = 自由现金流 / （1 + 贴现率）^ <sup>y</sup></p>
+      <p>永续现金流 = 上一年自由现金流 * （1 + 永续增长率）* （1 + 贴现率） / （贴现率 - 永续增长率）</p>
+      <p>永续现金流折现 = 永续现金流 / （1 + 贴现率）^ <sup>y</sup></p>
+      <p>折现合计 = 每一年的现金流折现累计相加</p>
     </div>
     <div class="table-wrapper">
       <table border="1" cellspacing="0" cellpadding="0">
