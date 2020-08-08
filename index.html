@@ -145,7 +145,7 @@
             <th>年份</th>
             <th>增长率</th>
             <th>自由现金流</th>
-            <th>价值贴现</th>
+            <th>现金流折现</th>
           </tr>
         </thead>
         <tbody id="tbody">
@@ -249,7 +249,7 @@
       })
       innerHTML += `
         <tr  style="font-weight:bold;">
-          <td colspan="3" style="text-align:center">价值合计</td>
+          <td colspan="3" style="text-align:center">折现合计</td>
           <td>${countValue.toFixed(4)}</td>
         </tr>`
       $('#tbody').innerHTML = innerHTML
